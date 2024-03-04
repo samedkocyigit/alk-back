@@ -34,14 +34,17 @@ const userSchema = new mongoose.Schema({
     default: "belirtmek-istemiyorum",
   },
   telNumber: {
-    countryCode: {
-      type: Number,
-      required: true,
+    type: {
+      countryCode: {
+        type: Number,
+        required: true,
+      },
+      number: {
+        type: Number,
+        required: true,
+      },
     },
-    number: {
-      type: Number,
-      required: true,
-    },
+    required: false,
   },
   companyName: {
     type: String,
@@ -75,6 +78,12 @@ userSchema.pre("save", function (next) {
   if (!this.isModified("password") || this.name) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
+  next();
+});
+
+userSchema.pre(/^find/, function (next) {
+  // this points to the current query
+  this.find({ active: { $ne: false } });
   next();
 });
 
