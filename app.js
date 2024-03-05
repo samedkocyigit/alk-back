@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 
 const viewRouter = require("./src/routes/viewRoutes");
 const userRouter = require("./src/routes/userRoutes");
+const productRouter = require("./src/routes/productRoutes");
+const categoryRouter = require("./src/routes/categoryRoutes");
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use((req, res, next) => {
 // Routes
 app.use("/", viewRouter);
 app.use("/users", userRouter);
+app.use("/products", productRouter);
+app.use("/category", categoryRouter);
 
 // app.use("/urun", productRouter);
 // app.use("/kargo-takibi", cargoTrackingRouter);
