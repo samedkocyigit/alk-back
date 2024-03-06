@@ -11,7 +11,13 @@ router
 router
   .route("/:id")
   .get(categoryService.getCategory)
+  .post(categoryService.createSubCategory)
   .patch(categoryService.updateCategory)
   .delete(categoryService.deleteCategory);
+
+router
+  .route("/:id/sub_category/:sub_category_id")
+  .patch(categoryService.updateSubCategory)
+  .delete(categoryService.deleteSubCategory);
 
 module.exports = router;
