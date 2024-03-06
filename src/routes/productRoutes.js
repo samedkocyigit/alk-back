@@ -11,6 +11,7 @@ router
 router
   .route("/:id")
   .get(productSevice.getOne)
+  .post(productSevice.addCategoryAtProduct)
   .patch(productSevice.updateProduct)
   .delete(productSevice.deleteOne);
 
