@@ -1,11 +1,12 @@
 const mongoose = require("mongoose");
-const { Schema } = mongoose;
+const { default: slugify } = require("slugify");
 
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
     required: [true, "Product must hava a name"],
   },
+  slug: String,
   brand: {
     type: String,
     required: [true, "Product must have a brand"],
@@ -35,9 +36,15 @@ const productSchema = new mongoose.Schema({
   ],
 });
 
+productSchema.pre("save", function (next) {
+  this.slug = slugify(this.name, { lower: true });
+
+  next();
+});
+
 productSchema.pre(/^find/, function (next) {
   this.populate({
-    path: "categories",
+    path: "categories.sub_category",
     select: "-__v ",
   });
 
