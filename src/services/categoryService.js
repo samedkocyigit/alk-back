@@ -19,6 +19,76 @@ exports.getAllCategory = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.updateSubCategory = catchAsync(async (req, res, next) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    return next(new AppError("No documents found.", 404));
+  }
+
+  const subCategory = category.sub_category.id(req.params.sub_category_id);
+
+  if (!subCategory) {
+    return next(new AppError("No Sub Category documents found.", 404));
+  }
+
+  Object.keys(req.body).forEach((key) => {
+    subCategory[key] = req.body[key];
+  });
+
+  await category.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: category,
+    },
+  });
+});
+
+exports.deleteSubCategory = catchAsync(async (req, res, next) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    return next(new AppError("No documents found.", 404));
+  }
+
+  const subCategory = category.sub_category.id(req.params.sub_category_id);
+
+  if (!subCategory) {
+    return next(new AppError("No Sub Category documents found.", 404));
+  }
+
+  category.sub_category.pull({ _id: req.params.sub_category_id });
+
+  await category.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: null,
+    },
+  });
+});
+
+exports.createSubCategory = catchAsync(async (req, res, next) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    return next(new AppError("No documents found.", 404));
+  }
+
+  category.sub_category.push(req.body);
+  await category.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: category,
+    },
+  });
+});
+
 exports.createCategory = catchAsync(async (req, res, next) => {
   const category = await Category.create(req.body);
 

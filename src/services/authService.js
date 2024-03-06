@@ -77,12 +77,24 @@ exports.login = catchAsync(async (req, res, next) => {
   });
 });
 
+// exports.logout = (req, res) => {
+//   res.cookie("jwt", "loggedout", {
+//     expires: new Date(Date.now() + 10 * 1000),
+//     httpOnly: true,
+//   });
+//   console.log(res.cookie.jwt);
+//   res.status(200).json({ status: "success" });
+// };
 exports.logout = (req, res) => {
-  res.cookie("jwt", "loggedout", {
-    expires: new Date(Date.now() + 10 * 1000),
-    httpOnly: true,
-  });
-  res.status(200).json({ status: "success" });
+  try {
+    res.cookie("jwt", "", {
+      expires: new Date(0),
+      httpOnly: true,
+    });
+    res.status(200).json({ status: "success" });
+  } catch (err) {
+    console.error("Çerez oluşturma hatası:", err);
+  }
 };
 
 exports.protect = catchAsync(async (req, res, next) => {
