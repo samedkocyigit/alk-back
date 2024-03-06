@@ -6,7 +6,10 @@ const categorySchema = new mongoose.Schema({
   slug: String,
   sub_category: [
     {
-      category_name: String,
+      category_name: {
+        type: String,
+        unique: true,
+      },
       slug: String,
       sub_product: [
         {
