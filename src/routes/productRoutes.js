@@ -1,7 +1,10 @@
 const express = require("express");
 const productSevice = require("../services/productService");
+const commentRoutes = require("./commentRoutes");
 
 const router = express.Router();
+
+router.use("/:productId/comment", commentRoutes);
 
 router
   .route("/")
@@ -10,9 +13,9 @@ router
 
 router
   .route("/:id")
-  .get(productSevice.getOne)
+  .get(productSevice.getProduct)
   .post(productSevice.addCategoryAtProduct)
   .patch(productSevice.updateProduct)
-  .delete(productSevice.deleteOne);
+  .delete(productSevice.deleteProduct);
 
 module.exports = router;
