@@ -17,6 +17,8 @@ router
 
 router
   .route("/:id/sub_category/:sub_category_id")
+  .get(categoryService.getProductsUnderSubCategory)
+  .post(categoryService.addProductAtSubCategory)
   .patch(categoryService.updateSubCategory)
   .delete(categoryService.deleteSubCategory);
 
