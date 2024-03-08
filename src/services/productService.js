@@ -35,7 +35,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.deleteOne = catchAsync(async (req, res, next) => {
+exports.deleteProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findByIdAndDelete(req.params.id);
 
   if (!product) {
@@ -49,7 +49,7 @@ exports.deleteOne = catchAsync(async (req, res, next) => {
     },
   });
 });
-exports.getOne = catchAsync(async (req, res, next) => {
+exports.getProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 
   if (!product) {

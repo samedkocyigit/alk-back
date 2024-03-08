@@ -125,6 +125,10 @@ userSchema.methods.createPasswordResetToken = function () {
   return resetToken;
 };
 
+userSchema.virtual("fullName").get(function () {
+  return this.name + " " + this.surname;
+});
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
