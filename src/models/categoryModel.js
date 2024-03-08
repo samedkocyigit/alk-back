@@ -2,24 +2,28 @@ const mongoose = require("mongoose");
 const slugify = require("slugify");
 
 const categorySchema = new mongoose.Schema({
-  category_name: String,
+  category_name: {
+    type: String,
+    required: [true, "Category must hava a name"],
+    unique: true,
+  },
   slug: String,
   sub_category: [
     {
-      category_name: {
-        type: String,
-        unique: true,
-      },
+      sub_category_name: { type: String, unique: true },
       slug: String,
       sub_product: [
         {
           type: mongoose.Schema.ObjectId,
           ref: "Product",
+          unique: true,
         },
       ],
     },
   ],
 });
+
+categorySchema.index({ sub_category: 1 }, { unique: true });
 
 categorySchema.pre("save", function (next) {
   this.slug = slugify(this.category_name, { lower: true });
@@ -29,7 +33,7 @@ categorySchema.pre("save", function (next) {
   }
 
   this.sub_category.forEach((sub) => {
-    sub.slug = slugify(sub.category_name, { lower: true });
+    sub.slug = slugify(sub.sub_category_name, { lower: true });
   });
 
   next();
