@@ -3,19 +3,26 @@ const Category = require("../models/categoryModel");
 
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const FilterProduct = require("../utils/filter");
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
-  const product = await Product.find();
+  // To allow for nested GET reviews on tour (hack)
+  let filter = {};
+  if (req.params.productId) filter = { product: req.params.tourId };
 
-  if (!product) {
-    return next(new AppError("No document find ", 404));
-  }
+  const features = new FilterProduct(Product.find(filter), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+  // const doc = await features.query.explain();
+  const doc = await features.query;
 
   res.status(200).json({
-    status: "succes",
-    requestedAt: product.length,
+    status: "success",
+    requestedAt: doc.length,
     data: {
-      data: product,
+      data: doc,
     },
   });
 });
