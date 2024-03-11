@@ -11,6 +11,7 @@ const productSchema = new mongoose.Schema(
     brand: {
       type: String,
       required: [true, "Product must have a brand"],
+      uppercase: true,
     },
     price: {
       type: Number,
@@ -33,6 +34,7 @@ const productSchema = new mongoose.Schema(
     },
     summary: {
       type: String,
+      trim: true,
       required: [true, "Product must have a summary"],
     },
     manufactorer_code: {
