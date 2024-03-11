@@ -34,51 +34,51 @@ commentSchema.pre(/^find/, function (next) {
   next();
 });
 
-// commentSchema.statics.calcAverageRatings = async function (productId) {
-//   const stats = await this.aggregate([
-//     {
-//       $match: { product: productId },
-//     },
-//     {
-//       $group: {
-//         _id: "$product",
-//         nRating: { $sum: 1 },
-//         avgRating: { $avg: "$rating" },
-//       },
-//     },
-//   ]);
-//   // console.log(stats);
+commentSchema.statics.calcAverageRatings = async function (productId) {
+  const stats = await this.aggregate([
+    {
+      $match: { product: productId },
+    },
+    {
+      $group: {
+        _id: "$product",
+        nRating: { $sum: 1 },
+        avgRating: { $avg: "$rating" },
+      },
+    },
+  ]);
+  // console.log(stats);
 
-//   if (stats.length > 0) {
-//     await Product.findByIdAndUpdate(productId, {
-//       ratingsQuantity: stats[0].nRating,
-//       ratingsAverage: stats[0].avgRating,
-//     });
-//   } else {
-//     await Product.findByIdAndUpdate(productId, {
-//       ratingsQuantity: 0,
-//       ratingsAverage: 4.5,
-//     });
-//   }
-// };
+  if (stats.length > 0) {
+    await Product.findByIdAndUpdate(productId, {
+      ratingsQuantity: stats[0].nRating,
+      ratingsAverage: stats[0].avgRating,
+    });
+  } else {
+    await Product.findByIdAndUpdate(productId, {
+      ratingsQuantity: 0,
+      ratingsAverage: 4.5,
+    });
+  }
+};
 
-// commentSchema.post("save", function () {
-//   // this points to current review
-//   this.constructor.calcAverageRatings(this.product);
-// });
+commentSchema.post("save", function () {
+  // this points to current review
+  this.constructor.calcAverageRatings(this.product);
+});
 
-// // findByIdAndUpdate
-// // findByIdAndDelete
-// commentSchema.pre(/^findOneAnd/, async function (next) {
-//   this.r = await this.findOne();
-//   // console.log(this.r);
-//   next();
-// });
+// findByIdAndUpdate
+// findByIdAndDelete
+commentSchema.pre(/^findOneAnd/, async function (next) {
+  this.r = await this.findOne();
+  // console.log(this.r);
+  next();
+});
 
-// commentSchema.post(/^findOneAnd/, async function () {
-//   // await this.findOne(); does NOT work here, query has already executed
-//   await this.r.constructor.calcAverageRatings(this.r.product);
-// });
+commentSchema.post(/^findOneAnd/, async function () {
+  // await this.findOne(); does NOT work here, query has already executed
+  await this.r.constructor.calcAverageRatings(this.r.product);
+});
 
 const Comment = mongoose.model("Comment", commentSchema);
 
