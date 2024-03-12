@@ -8,6 +8,8 @@ const xss = require("xss-clean");
 const hpp = require("hpp");
 const bodyParser = require("body-parser");
 
+const AppError = require("./src/utils/appError");
+const globalErrorHandler = require("./src/services/errorService");
 const userRouter = require("./src/routes/userRoutes");
 const productRouter = require("./src/routes/productRoutes");
 const categoryRouter = require("./src/routes/categoryRoutes");
@@ -23,7 +25,9 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(helmet());
 
 // Development logging
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 // Limit request from same API
 const limiter = rateLimit({
@@ -63,6 +67,10 @@ app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/comments", commentRouter);
 
-//app.use(globalErrorHandler);
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+app.use(globalErrorHandler);
 
 module.exports = app;
