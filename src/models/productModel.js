@@ -6,6 +6,8 @@ const productSchema = new mongoose.Schema(
     name: {
       type: String,
       required: [true, "Product must hava a name"],
+      unique: true,
+      trim: true,
     },
     slug: String,
     brand: {

@@ -16,8 +16,10 @@ const sendEmail = async (options) => {
     from: "Samed KOCYIGIT <ceo@gmail.com>",
     to: options.email,
     subject: options.subject,
-    text: options.message,
-    // html:
+    text: options.msg,
+    html: `<h1>${options.subject}</h1>
+    <p>${options.message}</p>
+    <p>Bu bir HTML e-posta örneğidir.</p>`,
   };
 
   // 3) Actually send the email

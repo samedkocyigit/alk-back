@@ -50,40 +50,5 @@ class FilterProduct {
     return this;
   }
 }
+
 module.exports = FilterProduct;
-
-// module.exports = {
-//   filterProduct: function (products, filters) {
-//     let filteredProducts = [...products];
-
-//     // Category filter
-//     if (filters.category) {
-//       filteredProducts = filteredProducts.filter(
-//         (product) => product.category_name === filters.category
-//       );
-//     }
-
-//     // Price filter
-//     if (filters.minPrice && filters.maxPrice) {
-//       filteredProducts = filteredProducts.filter(
-//         (product) =>
-//           product.price >= filters.minPrice && product.price <= filters.maxPrice
-//       );
-//     }
-
-//     // Brand filter
-//     if (filters.brand) {
-//       filteredProducts = filteredProducts.filter(
-//         (product) => product.brand == filters.brand
-//       );
-//     }
-
-//     if (filters.minRating) {
-//       filteredProducts = filteredProducts.filter(
-//         (product) => product.ratingsAverage >= filters.minRating
-//       );
-//     }
-
-//     return filteredProducts;
-//   },
-// };
