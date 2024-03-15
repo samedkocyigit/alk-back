@@ -1,7 +1,24 @@
 {
-  "tabWidth": 2,
-  "semi": true,
   "singleQuote": true,
-  "trailingComma": "all",
-  "printWidth": 80
+  "semi": false,
+  "tabWidth": 2,
+  "printWidth": 80,
+  "arrowParens": "avoid",
+  "jsxBracketSameLine": true,
+  "endOfLine": "lf",
+  "jsxSingleQuote": true,
+  "trailingComma": "none",
+  "quoteProps": "as-needed",
+  "bracketSpacing": true,
+  "vueIndentScriptAndStyle": false,
+  "insertPragma": false,
+  "disableLanguages": [],
+  "overrides": [
+    {
+      "files": ".eslintrc.js",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ]
 }
