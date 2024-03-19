@@ -27,6 +27,10 @@ const app = express();
 
 // 1) GLOBAL MIDLLEWARES
 // Serving static files
+const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
+
+app.use(express.static(vueAppPath));
+
 app.use(express.static(path.join(__dirname, "public")));
 
 // Set security HTTP headers
@@ -85,6 +89,10 @@ app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/comments", commentRouter);
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(vueAppPath, "index.html"));
+});
 
 app.all("*", (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
