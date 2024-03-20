@@ -1,9 +1,51 @@
+const multer = require("multer");
+const sharp = require("sharp");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const FilterProduct = require("../utils/filter");
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadProductImages = upload.fields([{ name: "photos", maxCount: 3 }]);
+
+exports.resizeProductImages = catchAsync(async (req, res, next) => {
+  if (!req.files.photos) return next();
+
+  // 1) Images
+  req.body.photos = [];
+
+  await Promise.all(
+    req.files.photos.map(async (file, i) => {
+      const filename = `product-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize(2000, 1333)
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`src/assets/images/product/${filename}`);
+
+      req.body.photos.push(filename);
+    })
+  );
+
+  next();
+});
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
   // To allow for nested GET reviews on tour (hack)
@@ -72,6 +114,9 @@ exports.getProduct = catchAsync(async (req, res, next) => {
 });
 
 exports.updateProduct = catchAsync(async (req, res, next) => {
+  console.log(req.file);
+  console.log(req.body);
+
   const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
