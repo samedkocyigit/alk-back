@@ -7,11 +7,6 @@ const mongoSanitize = require("express-mongo-sanitize");
 const xss = require("xss-clean");
 const hpp = require("hpp");
 const bodyParser = require("body-parser");
-// const Vue = require("vue");
-// const App = require("./src/frontend/src/App.vue");
-// const VueRouter = require("vue-router");
-// const axios = require("axios");
-// const VueAxios = require("vue-axios");
 
 const AppError = require("./src/utils/appError");
 const globalErrorHandler = require("./src/services/errorService");
@@ -21,9 +16,6 @@ const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
 
 const app = express();
-
-// Vue.use(VueRouter);
-// Vue.use(VueRouter, axios);
 
 // 1) GLOBAL MIDLLEWARES
 // Serving static files
@@ -74,19 +66,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
-// const router = new VueRouter({
-//   routes,
-// });
-
-// new Vue({
-//   el: "#app",
-//   router,
-//   store,
-//   render: (h) => h(App),
-// });
-
 app.use("/api/users", userRouter);
-app.use("/api/products", productRouter);
+app.use("/shopping/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/comments", commentRouter);
 
