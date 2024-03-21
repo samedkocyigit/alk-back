@@ -43,7 +43,7 @@ const productSchema = new mongoose.Schema(
       type: String,
       required: [true, "Product must have a brand"],
     },
-    photo: String,
+    photos: [String],
     category_name: String,
   },
   {

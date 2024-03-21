@@ -23,6 +23,8 @@ router
   .patch(
     authService.protect,
     authService.restrictTo("admin"),
+    productSevice.uploadProductImages,
+    productSevice.resizeProductImages,
     productSevice.updateProduct
   )
   .delete(
