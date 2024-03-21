@@ -16,12 +16,11 @@ const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
 
 const app = express();
+const staticFilesPath = path.join(__dirname, "../frontend/dist");
 
 // 1) GLOBAL MIDLLEWARES
 // Serving static files
 const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
-
-app.use(express.static(vueAppPath));
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -65,9 +64,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(express.static(vueAppPath));
+app.use(express.static(staticFilesPath));
+
 // Routes
 app.use("/api/users", userRouter);
-app.use("/shopping/products", productRouter);
+app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/comments", commentRouter);
 
