@@ -32,8 +32,10 @@
     "path": "^0.12.7",
     "sharp": "^0.33.2",
     "slugify": "^1.6.6",
+    "swiper": "^11.0.7",
     "validator": "^13.11.0",
     "vue": "^3.4.21",
+    "vue-awesome-swiper": "^5.0.1",
     "vue-axios": "^3.5.2",
     "vue-router": "^4.3.0",
     "xss-clean": "^0.1.4"
