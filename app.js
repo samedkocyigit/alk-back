@@ -14,6 +14,7 @@ const userRouter = require("./src/routes/userRoutes");
 const productRouter = require("./src/routes/productRoutes");
 const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
+const overviewRouter = require("./src/routes/overviewRoutes");
 
 const app = express();
 const staticFilesPath = path.join(__dirname, "../frontend/dist");
@@ -68,6 +69,7 @@ app.use(express.static(vueAppPath));
 app.use(express.static(staticFilesPath));
 
 // Routes
+app.use("/", overviewRouter);
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
