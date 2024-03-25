@@ -1,11 +1,11 @@
-const path = require("path");
 const express = require("express");
+const path = require("path");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-const helmet = require("helmet");
-const mongoSanitize = require("express-mongo-sanitize");
-const xss = require("xss-clean");
-const hpp = require("hpp");
+// const helmet = require("helmet");
+// const mongoSanitize = require("express-mongo-sanitize");
+//const xss = require("xss-clean");
+//const hpp = require("hpp");
 const bodyParser = require("body-parser");
 
 const AppError = require("./src/utils/appError");
@@ -15,18 +15,19 @@ const productRouter = require("./src/routes/productRoutes");
 const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
 const overviewRouter = require("./src/routes/overviewRoutes");
+const brandRouter = require("./src/routes/brandRoutes");
 
 const app = express();
-const staticFilesPath = path.join(__dirname, "../frontend/dist");
 
 // 1) GLOBAL MIDLLEWARES
 // Serving static files
+const staticFilesPath = path.join(__dirname, "../frontend/dist");
 const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "assets")));
 
 // Set security HTTP headers
-app.use(helmet());
+//app.use(helmet());
 
 // Development logging
 if (process.env.NODE_ENV === "development") {
@@ -47,17 +48,17 @@ app.use(express.urlencoded({ extended: true, limit: "10kb" }));
 app.use(bodyParser.json());
 
 // Data sanitization against NoSql query injection
-app.use(mongoSanitize());
+//app.use(mongoSanitize());
 
 // Data sanitization against XSS
-app.use(xss());
+//app.use(xss());
 
 // Prevent parameter pollution
-app.use(
-  hpp({
-    whitelist: ["price", "ratingsQuantity", "ratingsAverage", "brand"],
-  })
-);
+// app.use(
+//   hpp({
+//     whitelist: ["price", "ratingsQuantity", "ratingsAverage", "brand"],
+//   })
+// );
 
 // Test Middleware
 app.use((req, res, next) => {
@@ -74,6 +75,7 @@ app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/comments", commentRouter);
+app.use("/api/brands", brandRouter);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(vueAppPath, "index.html"));
