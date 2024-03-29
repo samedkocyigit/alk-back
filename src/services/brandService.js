@@ -36,7 +36,7 @@ exports.resizeBrandImages = catchAsync(async (req, res, next) => {
         .resize(180, 180)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`src/assets/images/brands/${filename}`);
+        .toFile(`frontend/src/assets/images/brands/${filename}`);
 
       req.body.photo.push(filename);
     })

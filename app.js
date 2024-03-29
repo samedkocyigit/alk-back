@@ -71,11 +71,11 @@ app.use(express.static(staticFilesPath));
 
 // Routes
 app.use("/", overviewRouter);
-app.use("/api/users", userRouter);
-app.use("/api/products", productRouter);
-app.use("/api/category", categoryRouter);
-app.use("/api/comments", commentRouter);
-app.use("/api/brands", brandRouter);
+app.use("/users", userRouter);
+app.use("/products", productRouter);
+app.use("/category", categoryRouter);
+app.use("/comments", commentRouter);
+app.use("/brands", brandRouter);
 
 app.get("*", (req, res) => {
   res.sendFile(path.join(vueAppPath, "index.html"));
