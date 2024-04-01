@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 //const xss = require("xss-clean");
 //const hpp = require("hpp");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 
 const AppError = require("./src/utils/appError");
 const globalErrorHandler = require("./src/services/errorService");
@@ -45,6 +46,7 @@ app.use("/api", limiter);
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+app.use(cookieParser());
 app.use(bodyParser.json());
 
 // Data sanitization against NoSql query injection
@@ -63,6 +65,7 @@ app.use(bodyParser.json());
 // Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.cookies);
   next();
 });
 

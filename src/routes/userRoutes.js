@@ -13,6 +13,7 @@ router.patch("/resetPassword/:token", authService.resetPassword);
 
 //Protect all routes after this middleware
 router.use(authService.protect);
+//router.route("/me").get(userService.getMe, userService.getOneUser);
 
 router.patch("/updatePassword", authService.updatePassword);
 
