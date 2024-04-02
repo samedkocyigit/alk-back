@@ -2,12 +2,12 @@ const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
 const rateLimit = require("express-rate-limit");
-// const helmet = require("helmet");
-// const mongoSanitize = require("express-mongo-sanitize");
+//const helmet = require("helmet");
+//const mongoSanitize = require("express-mongo-sanitize");
 //const xss = require("xss-clean");
 //const hpp = require("hpp");
+//const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
-const cookieParser = require("cookie-parser");
 
 const AppError = require("./src/utils/appError");
 const globalErrorHandler = require("./src/services/errorService");
@@ -21,6 +21,7 @@ const brandRouter = require("./src/routes/brandRoutes");
 const app = express();
 
 // 1) GLOBAL MIDLLEWARES
+// app.set("view-engine", "ejs");
 // Serving static files
 const staticFilesPath = path.join(__dirname, "../frontend/dist");
 const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
@@ -41,12 +42,13 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   message: "Too many request from this IP, Please try again in a hour",
 });
-app.use("/api", limiter);
+app.use("/", limiter);
+
+// app.use(cookieParser());
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-app.use(cookieParser());
 app.use(bodyParser.json());
 
 // Data sanitization against NoSql query injection
@@ -65,7 +67,6 @@ app.use(bodyParser.json());
 // Test Middleware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.cookies);
   next();
 });
 
