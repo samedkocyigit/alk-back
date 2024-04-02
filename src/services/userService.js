@@ -2,10 +2,6 @@ const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
-// exports.getMe = (req, res, next) => {
-//   req.params.id = req.user.id;
-//   next();
-// };
 exports.getAllUsers = catchAsync(async (req, res, next) => {
   const users = await User.find();
 
@@ -16,6 +12,12 @@ exports.getAllUsers = catchAsync(async (req, res, next) => {
       data: users,
     },
   });
+});
+
+exports.getMe = catchAsync(async (req, res, next) => {
+  req.params.id = req.user.id;
+  console.log(req.params.id);
+  next();
 });
 
 exports.getOneUser = catchAsync(async (req, res, next) => {
