@@ -74,6 +74,12 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 });
 
+// exports.getMe = catchAsync(async (req, res, next) => {
+//   req.params.id = req.user.id;
+//   console.log(req.params.id);
+//   next();
+// });
+
 exports.logout = (req, res) => {
   res.cookie("jwt", "loggedout", {
     expires: new Date(Date.now() + 10 * 1000),
@@ -93,9 +99,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     req.headers.authorization.startsWith("Bearer")
   ) {
     token = req.headers.authorization.split(" ")[1];
-  } else if (req.cookies.jwt) {
-    token = req.cookies.jwt;
   }
+  // } else if (req.cookies.jwt) {
+  //   token = req.cookies.jwt;
+  // }
 
   console.log(token, "messi");
   // console.log(token)
