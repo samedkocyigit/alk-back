@@ -37,19 +37,18 @@ if (process.env.NODE_ENV === "development") {
 }
 
 // Limit request from same API
-const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: "Too many request from this IP, Please try again in a hour",
-});
-app.use("/", limiter);
+// const limiter = rateLimit({
+//   max: 1000,
+//   windowMs: 60 * 60 * 1000,
+//   message: "Too many request from this IP, Please try again in a hour",
+// });
+// app.use("/", limiter);
 
 // app.use(cookieParser());
 
 // Body parser, reading data from body into req.body
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
-app.use(bodyParser.json());
 
 // Data sanitization against NoSql query injection
 //app.use(mongoSanitize());
