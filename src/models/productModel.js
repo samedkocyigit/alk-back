@@ -45,6 +45,7 @@ const productSchema = new mongoose.Schema(
     },
     photos: [String],
     category_name: String,
+    subCategory_name: String,
   },
   {
     toJSON: { virtuals: true },
