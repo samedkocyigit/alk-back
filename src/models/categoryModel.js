@@ -33,7 +33,9 @@ categorySchema.pre("save", function (next) {
   }
 
   this.sub_category.forEach((sub) => {
-    sub.slug = slugify(sub.sub_category_name, { lower: true });
+    // Alt kategori adı varsa işlem yap
+    const subCategoryName = sub.sub_category_name;
+    sub.slug = slugify(subCategoryName, { lower: true });
   });
 
   next();
