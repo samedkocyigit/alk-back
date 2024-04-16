@@ -1,3 +1,4 @@
+const path = require("path");
 const multer = require("multer");
 const sharp = require("sharp");
 const Product = require("../models/productModel");
@@ -7,6 +8,10 @@ const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const FilterProduct = require("../utils/filter");
 
+const targetDir = path.join(
+  __dirname,
+  "../../../frontend/public/images/products/"
+);
 const multerStorage = multer.memoryStorage();
 
 const multerFilter = (req, file, cb) => {
@@ -38,7 +43,7 @@ exports.resizeProductImages = catchAsync(async (req, res, next) => {
         .resize(200, 180)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`frontend/public/images/products/${filename}`);
+        .toFile(`${targetDir}/${filename}`);
 
       req.body.photos.push(filename);
     })

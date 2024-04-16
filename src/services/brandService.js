@@ -1,9 +1,15 @@
+const path = require("path");
 const multer = require("multer");
 const sharp = require("sharp");
 
 const catchAsync = require("../utils/catchAsync");
 const Brands = require("../models/brandModel");
 const AppError = require("../utils/appError");
+
+const targetDir = path.join(
+  __dirname,
+  "../../../frontend/public/images/brands/"
+);
 
 const multerStorage = multer.memoryStorage();
 
@@ -36,7 +42,7 @@ exports.resizeBrandImages = catchAsync(async (req, res, next) => {
         .resize(180, 180)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`frontend/public/images/brands/${filename}`);
+        .toFile(`${targetDir}/${filename}`);
 
       req.body.photo.push(filename);
     })
