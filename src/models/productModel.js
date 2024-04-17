@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const path = require("path");
 const { default: slugify } = require("slugify");
 
 const productSchema = new mongoose.Schema(
@@ -44,7 +45,8 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product must have a brand"],
     },
     photos: [String],
-    category_name: String,
+    categoryId: String,
+    subCategoryId: String,
   },
   {
     toJSON: { virtuals: true },

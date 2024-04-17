@@ -128,7 +128,8 @@ exports.addProductAtSubCategory = catchAsync(async (req, res, next) => {
     return next(new AppError("No product found with given ID.", 404));
   }
 
-  product.category_name = subCategory.sub_category_name;
+  product.categoryID = category.id;
+  product.subCategoryID = subCategory.id;
   subCategory.sub_product.push(productId);
 
   await product.save();
