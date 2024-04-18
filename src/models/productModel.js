@@ -40,10 +40,7 @@ const productSchema = new mongoose.Schema(
       trim: true,
       required: [true, "Product must have a summary"],
     },
-    manufactorer_code: {
-      type: String,
-      required: [true, "Product must have a brand"],
-    },
+    manufactorer_code: String,
     photos: [String],
     categoryId: String,
     subCategoryId: String,
