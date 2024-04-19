@@ -30,7 +30,9 @@ const upload = multer({
 exports.uploadProductImages = upload.fields([{ name: "photos", maxCount: 3 }]);
 
 exports.resizeProductImages = catchAsync(async (req, res, next) => {
-  if (!req.files.photos) return next();
+  if (!req.files || !req.files.photos) {
+    return next(); // Dosya yüklenmemişse veya photos alanı yoksa bir sonraki middleware'e geç
+  }
 
   // 1) Images
   req.body.photos = [];
@@ -75,16 +77,36 @@ exports.getAllProducts = catchAsync(async (req, res, next) => {
 });
 
 exports.createProduct = catchAsync(async (req, res, next) => {
+  // Ürün oluşturma işlemi
   const newProduct = await Product.create(req.body);
 
-  if (!newProduct) {
-    return next(new AppError("Creation proccces failed ", 404));
+  // Eğer base64 formatında fotoğraf varsa
+  if (req.body.photos) {
+    // Base64 verisini buffer'a çevir
+    const imageBuffer = Buffer.from(
+      newProduct.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
+    // Resmi boyutlandır ve kaydet
+    const filename = `product-${newProduct._id}-${Date.now()}.jpeg`;
+    await sharp(imageBuffer)
+      .resize(200, 180)
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`${targetDir}/${filename}`);
+
+    // Oluşturulan dosya ismini veriye ekle
+    newProduct.photos = [];
+    newProduct.photos.push(filename);
+
+    // Ürünü güncelle
+    await newProduct.save();
   }
 
-  res.status(200).json({
+  res.status(201).json({
     status: "success",
     data: {
-      data: newProduct,
+      product: newProduct,
     },
   });
 });
