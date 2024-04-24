@@ -26,25 +26,25 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
-exports.uploadBrandImages = upload.fields([{ name: "photo" }]);
+exports.uploadBrandImages = upload.fields([{ name: "photos" }]);
 
 exports.resizeBrandImages = catchAsync(async (req, res, next) => {
-  if (!req.files.photo) return next();
+  if (!req.files || !req.files.photos) return next();
 
   // 1) Images
-  req.body.photo = [];
+  req.body.photos = [];
 
   await Promise.all(
-    req.files.photo.map(async (file, i) => {
+    req.files.photos.map(async (file, i) => {
       const filename = `brand-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
 
       await sharp(file.buffer)
-        .resize(180, 180)
+        .resize({ width: 210, height: 180, withoutEnlargement: true })
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
         .toFile(`${targetDir}/${filename}`);
 
-      req.body.photo.push(filename);
+      req.body.photos.push(filename);
     })
   );
 
@@ -63,11 +63,34 @@ exports.getAllBrands = catchAsync(async (req, res, err) => {
   });
 });
 
-exports.createNewBrand = catchAsync(async (req, res, err) => {
+exports.createNewBrand = catchAsync(async (req, res, next) => {
   const newBrand = await Brands.create(req.body);
 
+  // Eğer base64 formatında fotoğraf varsa
+  if (req.body.photos) {
+    // Base64 verisini buffer'a çevir
+    const imageBuffer = Buffer.from(
+      newBrand.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
+    // Resmi boyutlandır ve kaydet
+    const filename = `brand-${newBrand._id}-${Date.now()}.jpeg`;
+    await sharp(imageBuffer)
+      .resize({ width: 210, height: 180, withoutEnlargement: true })
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`${targetDir}/${filename}`);
+
+    // Oluşturulan dosya ismini veriye ekle
+    newBrand.photos = [];
+    newBrand.photos.push(filename);
+
+    // Ürünü güncelle
+    await newBrand.save();
+  }
+
   res.status(200).json({
-    status: "success",
+    status: "succes",
     data: {
       data: newBrand,
     },
