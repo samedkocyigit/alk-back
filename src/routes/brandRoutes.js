@@ -1,12 +1,19 @@
 const express = require("express");
 const brandsService = require("../services/brandService");
+const authService = require("../services/authService");
 
 const router = express.Router();
 
 router
   .route("/")
   .get(brandsService.getAllBrands)
-  .post(brandsService.createNewBrand);
+  .post(
+    authService.protect,
+    authService.restrictTo("admin"),
+    brandsService.uploadBrandImages,
+    brandsService.resizeBrandImages,
+    brandsService.createNewBrand
+  );
 router
   .route("/:id")
   .get(brandsService.getOneBrand)
