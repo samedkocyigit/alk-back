@@ -5,8 +5,11 @@
   "main": "app.js",
   "scripts": {
     "start": "nodemon server.js",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "start:prod": "NODE_ENV=production nodemon server.js",
-    "debug": "ndb server.js"
+    "debug": "ndb server.js",
+    "backend": "node server.js",
+    "frontend": "cd ../frontend && yarn dev"
   },
   "author": "Samed Kocyigit",
   "license": "ISC",
@@ -41,6 +44,7 @@
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "prettier": "^3.2.5"
   }
 }

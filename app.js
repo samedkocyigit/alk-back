@@ -17,16 +17,20 @@ const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
 const overviewRouter = require("./src/routes/overviewRoutes");
 const brandRouter = require("./src/routes/brandRoutes");
+const campaignRouter = require("./src/routes/campaignRoutes");
 
 const app = express();
 
 // 1) GLOBAL MIDLLEWARES
 // app.set("view-engine", "ejs");
 // Serving static files
-const staticFilesPath = path.join(__dirname, "../frontend/dist");
-const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
+// const staticFilesPath = path.join(__dirname, "../frontend/dist");
+// const vueAppPath = path.join(__dirname, "../frontend", "../frontend/dist");
+// app.use(express.static(path.join(__dirname, "assets")));
 
-app.use(express.static(path.join(__dirname, "assets")));
+// Statik dosyaları servis etme
+const staticFilesPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(staticFilesPath));
 
 // Set security HTTP headers
 //app.use(helmet());
@@ -69,7 +73,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(vueAppPath));
+// app.use(express.static(vueAppPath));
 app.use(express.static(staticFilesPath));
 
 // Routes
@@ -79,9 +83,14 @@ app.use("/products", productRouter);
 app.use("/category", categoryRouter);
 app.use("/comments", commentRouter);
 app.use("/brands", brandRouter);
+app.use("/campaigns", campaignRouter);
 
+// app.get("*", (req, res) => {
+//   res.sendFile(path.join(vueAppPath, "index.html"));
+// });
+// Frontend'e yönlendirme
 app.get("*", (req, res) => {
-  res.sendFile(path.join(vueAppPath, "index.html"));
+  res.sendFile(path.join(staticFilesPath, "index.html"));
 });
 
 app.all("*", (req, res, next) => {
