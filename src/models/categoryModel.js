@@ -16,14 +16,13 @@ const categorySchema = new mongoose.Schema({
         {
           type: mongoose.Schema.ObjectId,
           ref: "Product",
-          unique: true,
         },
       ],
     },
   ],
 });
 
-categorySchema.index({ sub_category: 1 }, { unique: true });
+categorySchema.index({ sub_category: 1 });
 
 categorySchema.pre("save", function (next) {
   this.slug = slugify(this.category_name, { lower: true });
