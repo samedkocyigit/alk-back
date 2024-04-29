@@ -1,9 +1,9 @@
 const path = require("path");
 const multer = require("multer");
 const sharp = require("sharp");
+
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
-
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const FilterProduct = require("../utils/filter");
@@ -118,6 +118,11 @@ exports.deleteProduct = catchAsync(async (req, res, next) => {
     return next(new AppError("Creation proccces failed ", 404));
   }
 
+  await Category.updateMany(
+    { "sub_category.sub_product": req.params.id },
+    { $pull: { "sub_category.$.sub_product": req.params.id } }
+  );
+
   res.status(200).json({
     status: "success",
     data: {
@@ -125,6 +130,7 @@ exports.deleteProduct = catchAsync(async (req, res, next) => {
     },
   });
 });
+
 exports.getProduct = catchAsync(async (req, res, next) => {
   const product = await Product.findById(req.params.id);
 

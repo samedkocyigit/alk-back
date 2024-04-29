@@ -5,6 +5,7 @@ const User = require("../models/userModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const Email = require("../utils/email");
+const Cart = require("../models/cartModel");
 
 const signToken = (id) => {
   return jwt.sign({ id: id }, process.env.JWT_SECRET, {
@@ -43,6 +44,12 @@ exports.signUp = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
   });
+
+  const newCart = await Cart.create({
+    userId: newUser._id,
+  });
+
+  await User.updateOne(newUser._id, { cart: newCart._id });
 
   const url = `${req.protocol}://${req.get("host")}/me`;
   console.log(url);
