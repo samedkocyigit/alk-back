@@ -40,7 +40,7 @@ exports.resizeCampaignImages = catchAsync(async (req, res, next) => {
       const filename = `campaign-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
 
       await sharp(file.buffer)
-        .resize(1400, 450)
+        .resize(1600, 450)
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
         .toFile(`${targetDir}/${filename}`);
