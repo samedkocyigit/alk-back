@@ -11,11 +11,11 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
     slug: String,
-    brand: {
-      type: String,
-      required: [true, "Product must have a brand"],
-      uppercase: true,
-    },
+    // brand: {
+    //   type: String,
+    //   required: [true, "Product must have a brand"],
+    //   uppercase: true,
+    // },
     price: {
       type: Number,
       required: [true, "Product must have a price"],
@@ -47,6 +47,10 @@ const productSchema = new mongoose.Schema(
         required: [true, "Product must have a photo"],
       },
     ],
+    brand: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Brand",
+    },
     categoryId: String,
     subCategoryId: String,
   },
