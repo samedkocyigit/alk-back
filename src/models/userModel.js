@@ -57,6 +57,10 @@ const userSchema = new mongoose.Schema({
     Enum: ["admin", "user"],
     default: "user",
   },
+  cart: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Cart",
+  },
   taxOffice: String,
   taxNumber: Number,
   passwordChangedAt: Date,
