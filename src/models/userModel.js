@@ -61,6 +61,7 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: "Cart",
   },
+  favoriteItems: [{ type: mongoose.Schema.ObjectId, ref: "Product" }],
   taxOffice: String,
   taxNumber: Number,
   passwordChangedAt: Date,
