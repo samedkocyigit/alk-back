@@ -1,5 +1,6 @@
 const Cart = require("../models/cartModel");
 const catchAsync = require("../utils/catchAsync");
+const AppError = require("../utils/appError");
 
 exports.createCart = catchAsync(async (req, res, next) => {
   const cart = await Cart.create(req.body);
@@ -29,9 +30,17 @@ exports.getCart = catchAsync(async (req, res, next) => {
 
 exports.addProductAtCart = catchAsync(async (req, res, next) => {
   const { items } = req.body;
+  console.log("deneeemeeee -> ", items);
   const cart = await Cart.findById(req.params.id);
 
-  cart.items.push(items);
+  if (Array.isArray(items)) {
+    items.forEach((item) => {
+      cart.items.push(item._id);
+    });
+  } else {
+    cart.items.push(items);
+  }
+
   await cart.save();
 
   res.status(200).json({
