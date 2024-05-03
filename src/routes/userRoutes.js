@@ -12,13 +12,13 @@ router.post("/forgotPassword", authService.forgotPassword);
 router.patch("/resetPassword/:token", authService.resetPassword);
 
 //Protect all routes after this middleware
-router.use(authService.protect);
+// router.use(authService.protect);
 
 //router.get("/me", authService.getMe, userService.getOneUser);
 router.patch("/updatePassword", authService.updatePassword);
 
 // only admin access from here
-router.use(authService.restrictTo("admin"));
+// router.use(authService.restrictTo("admin"));
 
 router.route("/").get(userService.getAllUsers).post(userService.createOneUser);
 
