@@ -1,4 +1,5 @@
 const User = require("../models/userModel");
+const Cart = require("../models/cartModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
@@ -32,6 +33,12 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
 exports.createOneUser = catchAsync(async (req, res, next) => {
   console.log(req.body);
   const newUser = await User.create(req.body);
+
+  const newCart = await Cart.create({
+    userId: newUser._id,
+  });
+
+  await User.findByIdAndUpdate(newUser._id, { cart: newCart._id });
 
   res.status(200).json({
     status: "success",

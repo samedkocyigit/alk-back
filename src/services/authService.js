@@ -49,7 +49,7 @@ exports.signUp = catchAsync(async (req, res, next) => {
     userId: newUser._id,
   });
 
-  await User.updateOne(newUser._id, { cart: newCart._id });
+  await User.findByIdAndUpdate(newUser._id, { cart: newCart._id });
 
   const url = `${req.protocol}://${req.get("host")}/me`;
   console.log(url);
