@@ -8,6 +8,6 @@ const brandsSchema = new mongoose.Schema({
   photos: [String],
 });
 
-const Brand = mongoose.model("Brands", brandsSchema);
+const Brand = mongoose.model("Brand", brandsSchema);
 
 module.exports = Brand;
