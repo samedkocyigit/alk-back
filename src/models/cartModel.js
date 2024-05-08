@@ -4,8 +4,16 @@ const path = require("path");
 const cartSchema = new mongoose.Schema({
   items: [
     {
-      type: mongoose.Schema.ObjectId,
-      ref: "Product",
+      product: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Product",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        default: 1, // İsteğe bağlı, varsayılan değer atayabilirsiniz
+      },
     },
   ],
   userId: {
@@ -32,9 +40,9 @@ cartSchema.methods.calculateTotalPrice = async function () {
 
   // items içindeki ürünlerin fiyatlarını topla
   for (const item of this.items) {
-    const product = await Product.findById(item);
+    const product = await Product.findById(item.product);
     if (product) {
-      totalPrice += product.price;
+      totalPrice += product.price * item.quantity;
     }
   }
 
@@ -43,8 +51,7 @@ cartSchema.methods.calculateTotalPrice = async function () {
 
 cartSchema.pre(/^find/, function (next) {
   this.populate({
-    path: "items",
-    select: "-__v ",
+    path: "items.product",
   });
 
   next();

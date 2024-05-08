@@ -28,17 +28,41 @@ exports.getCart = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.getAllCarts = catchAsync(async (req, res, next) => {
+  const cart = await Cart.find();
+
+  if (!cart) {
+    return next(new AppError("There is a no document with that Id.", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    requiredAt: cart.length,
+    data: {
+      data: cart,
+    },
+  });
+});
+
 exports.addProductAtCart = catchAsync(async (req, res, next) => {
   const { items } = req.body;
-  console.log("deneeemeeee -> ", items);
   const cart = await Cart.findById(req.params.id);
 
   if (Array.isArray(items)) {
-    items.forEach((item) => {
-      cart.items.push(item._id);
-    });
-  } else {
-    cart.items.push(items);
+    for (const item of items) {
+      const existingItem = cart.items.find((cartItem) =>
+        cartItem.product.equals(item.product)
+      );
+
+      if (existingItem) {
+        // Eğer ürün kartta zaten varsa, sadece miktarını artır
+        existingItem.quantity += item.quantity;
+      } else {
+        console.log("else");
+        // Eğer ürün kartta yoksa, yeni bir ürün olarak ekle
+        cart.items.push({ product: item.product, quantity: item.quantity });
+      }
+    }
   }
 
   await cart.save();
