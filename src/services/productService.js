@@ -99,7 +99,12 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     newProduct.photos = [];
     newProduct.photos.push(filename);
 
+    const category = await Category.findById(req.body.categoryId);
+    const subCategory = category.sub_category.id(req.body.subCategoryId);
+
+    subCategory.sub_product.push(newProduct.id);
     // Ürünü güncelle
+    await category.save();
     await newProduct.save();
   }
 
