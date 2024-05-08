@@ -11,11 +11,6 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
     slug: String,
-    // brand: {
-    //   type: String,
-    //   required: [true, "Product must have a brand"],
-    //   uppercase: true,
-    // },
     price: {
       type: Number,
       required: [true, "Product must have a price"],
@@ -71,7 +66,14 @@ productSchema.pre("save", function (next) {
 
   next();
 });
+productSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "brand",
+    select: "-__v", // Gerekirse brand modelinden alınan alanları seçebilirsiniz
+  });
 
+  next();
+});
 const Product = mongoose.model("Product", productSchema);
 
 module.exports = Product;
