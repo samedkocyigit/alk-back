@@ -3,7 +3,7 @@ const cartService = require("../services/cartService");
 
 const router = express.Router();
 
-router.route("/").post(cartService.createCart);
+router.route("/").get(cartService.getAllCarts).post(cartService.createCart);
 
 router
   .route("/:id")
