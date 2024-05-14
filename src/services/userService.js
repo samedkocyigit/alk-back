@@ -31,7 +31,6 @@ exports.getOneUser = catchAsync(async (req, res, next) => {
 });
 
 exports.createOneUser = catchAsync(async (req, res, next) => {
-  console.log(req.body);
   const newUser = await User.create(req.body);
 
   const newCart = await Cart.create({
