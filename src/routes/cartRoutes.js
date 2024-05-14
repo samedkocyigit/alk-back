@@ -9,6 +9,6 @@ router
   .route("/:id")
   .get(cartService.getCart)
   .post(cartService.addProductAtCart)
-  .delete(cartService.removeProductAtCart);
+  .patch(cartService.removeProductFromCart);
 
 module.exports = router;
