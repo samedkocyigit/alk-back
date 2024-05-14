@@ -18,7 +18,7 @@ const categoryRouter = require("./src/routes/categoryRoutes");
 const commentRouter = require("./src/routes/commentRoutes");
 const overviewRouter = require("./src/routes/overviewRoutes");
 const brandRouter = require("./src/routes/brandRoutes");
-const campaignRouter = require("./src/routes/campaignRoutes");
+const sliderRouter = require("./src/routes/sliderRoutes");
 const cartRouter = require("./src/routes/cartRoutes");
 
 const app = express();
@@ -88,10 +88,10 @@ app.use((req, res, next) => {
 app.use("/", overviewRouter);
 app.use("/users", userRouter);
 app.use("/products", productRouter);
-app.use("/category", categoryRouter);
+app.use("/categories", categoryRouter);
 app.use("/comments", commentRouter);
 app.use("/brands", brandRouter);
-app.use("/campaigns", campaignRouter);
+app.use("/sliders", sliderRouter);
 app.use("/carts", cartRouter);
 
 // app.get("*", (req, res) => {
