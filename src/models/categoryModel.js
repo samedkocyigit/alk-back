@@ -5,24 +5,25 @@ const categorySchema = new mongoose.Schema({
   category_name: {
     type: String,
     required: [true, "Category must hava a name"],
-    unique: true,
   },
+  photos: [String],
   slug: String,
   sub_category: [
     {
-      sub_category_name: { type: String, unique: true },
+      sub_category_name: { type: String },
+      photos: [String],
       slug: String,
       sub_product: [
         {
           type: mongoose.Schema.ObjectId,
           ref: "Product",
+          required: false,
+          unique: false,
         },
       ],
     },
   ],
 });
-
-categorySchema.index({ sub_category: 1 });
 
 categorySchema.pre("save", function (next) {
   this.slug = slugify(this.category_name, { lower: true });
