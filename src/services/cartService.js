@@ -75,6 +75,33 @@ exports.addProductAtCart = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.removeProductFromCart = catchAsync(async (req, res, next) => {
+  const { items } = req.body;
+  const cart = await Cart.findById(req.params.id);
+
+  if (Array.isArray(items)) {
+    for (const item of items) {
+      const existingItem = cart.items.find((cartItem) =>
+        cartItem.product.equals(item.product)
+      );
+
+      if (existingItem) {
+        // Eğer ürün kartta zaten varsa, sadece miktarını artır
+        existingItem.quantity -= item.quantity;
+      }
+    }
+  }
+
+  await cart.save();
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: cart,
+    },
+  });
+});
+
 exports.removeProductAtCart = catchAsync(async (req, res, next) => {
   const removeItem = await Cart.findOneAndDelete(req.params.id);
 
