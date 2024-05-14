@@ -1,8 +1,84 @@
-const express = require("express");
+const path = require("path");
+const multer = require("multer");
+const sharp = require("sharp");
+
 const catchAsync = require("../utils/catchAsync");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const AppError = require("../utils/appError");
+
+const targetDirCategory = path.join(
+  __dirname,
+  "../../../frontend/public/images/categories/"
+);
+const targetDirSubCategory = path.join(
+  __dirname,
+  "../../../frontend/public/images/categories/subCategories"
+);
+
+const multerStorage = multer.memoryStorage();
+
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  } else {
+    cb(new AppError("Not an image! Please upload only images.", 400), false);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadCategoyImages = upload.fields([{ name: "photos" }]);
+
+exports.resizeCategoryImages = catchAsync(async (req, res, next) => {
+  if (!req.files || !req.files.photos) return next();
+
+  // 1) Images
+  req.body.photos = [];
+
+  await Promise.all(
+    req.files.photos.map(async (file, i) => {
+      const filename = `category-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize({ width: 240, height: 320, withoutEnlargement: true })
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`${targetDirCategory}/${filename}`);
+
+      req.body.photos.push(filename);
+    })
+  );
+
+  next();
+});
+exports.uploadSubCategoyImages = upload.fields([{ name: "photos" }]);
+
+exports.resizeSubCategoryImages = catchAsync(async (req, res, next) => {
+  if (!req.files || !req.files.photos) return next();
+
+  // 1) Images
+  req.body.photos = [];
+
+  await Promise.all(
+    req.files.photos.map(async (file, i) => {
+      const filename = `subCategory-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+
+      await sharp(file.buffer)
+        .resize({ width: 150, height: 160, withoutEnlargement: true })
+        .toFormat("jpeg")
+        .jpeg({ quality: 90 })
+        .toFile(`${targetDirSubCategory}/${filename}`);
+
+      req.body.photos.push(filename);
+    })
+  );
+
+  next();
+});
 
 exports.getAllCategory = catchAsync(async (req, res, next) => {
   const categories = await Category.find();
@@ -22,11 +98,60 @@ exports.getAllCategory = catchAsync(async (req, res, next) => {
 
 exports.createCategory = catchAsync(async (req, res, next) => {
   const category = await Category.create(req.body);
+  const lastSubCate = category.sub_category.pop();
 
   if (!category) {
     return next(new AppError("Documents could not be create.", 404));
   }
+  // Base64 verisini buffer'a çevir
+  const imageBuffer = Buffer.from(
+    lastSubCate.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
 
+  // const imageBufferCategory = Buffer.from(
+  //   category.photos.replace(/^data:image\/\w+;base64,/, ""),
+  //   "base64"
+  // );
+
+  // Resmi boyutlandır ve kaydet
+  // const catFileName = `category-${category._id}-${Date.now()}.jpeg`;
+  const filename = `subCategory-${lastSubCate._id}-${Date.now()}.jpeg`;
+  await sharp(imageBuffer)
+    .resize({ width: 150, height: 160, withoutEnlargement: true })
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`${targetDirSubCategory}/${filename}`);
+
+  // await sharp(imageBufferCategory)
+  //   .resize({ width: 240, height: 320, withoutEnlargement: true })
+  //   .toFormat("jpeg")
+  //   .jpeg({ quality: 90 })
+  //   .toFile(`${targetDirCategory}/${filename}`);
+  // const imageBuffer = Buffer.from(
+  //   category.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+  //   "base64"
+  // );
+  // // Resmi boyutlandır ve kaydet
+  // const filename = `category-${category._id}-${Date.now()}.jpeg`;
+  // await sharp(imageBuffer)
+  //   .resize({ width: 240, height: 320, withoutEnlargement: true })
+  //   .toFormat("jpeg")
+  //   .jpeg({ quality: 90 })
+  //   .toFile(`${targetDir}/${filename}`);
+
+  // Oluşturulan dosya ismini veriye ekle
+  // category.photos = catFileName;
+  // console.log("haliylee", category.photos);
+  lastSubCate.photos[0] = filename;
+  // Ürünü güncelle
+  category.sub_category.shift();
+  await category.save();
+  await Category.findByIdAndUpdate(
+    category._id,
+    { $push: { sub_category: lastSubCate } },
+    { new: true, runValidators: true }
+  );
   res.status(200).json({
     status: "success",
     data: {
@@ -175,8 +300,38 @@ exports.createSubCategory = catchAsync(async (req, res, next) => {
     return next(new AppError("No documents found.", 404));
   }
 
-  category.sub_category.push(req.body);
-  await category.save();
+  if (req.body.photos) {
+    console.log("girdi");
+    category.sub_category.push({
+      sub_category_name: req.body.sub_category_name,
+      photos: req.body.photos,
+    });
+    console.log("çıktı");
+
+    const newSubCategory = category.sub_category.pop();
+    // Base64 verisini buffer'a çevir
+    const imageBuffer = Buffer.from(
+      newSubCategory.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+      "base64"
+    );
+    // Resmi boyutlandır ve kaydet
+    const filename = `subCategory-${newSubCategory._id}-${Date.now()}.jpeg`;
+    await sharp(imageBuffer)
+      .resize({ width: 150, height: 160, withoutEnlargement: true })
+      .toFormat("jpeg")
+      .jpeg({ quality: 90 })
+      .toFile(`${targetDirSubCategory}/${filename}`);
+
+    newSubCategory.photos = filename;
+    console.log("istenilen kategori", newSubCategory);
+    console.log("id", req.params.id);
+    // await category.save();
+    await Category.findByIdAndUpdate(
+      req.params.id,
+      { $push: { sub_category: newSubCategory } },
+      { new: true, runValidators: false }
+    );
+  }
 
   res.status(200).json({
     status: "success",

@@ -2,7 +2,7 @@ const path = require("path");
 const multer = require("multer");
 const sharp = require("sharp");
 
-const Campaigns = require("../models/campaignModel");
+const Sliders = require("../models/sliderModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
@@ -53,33 +53,34 @@ exports.resizeCampaignImages = catchAsync(async (req, res, next) => {
 });
 
 exports.createCampaign = catchAsync(async (req, res, next) => {
-  const newCampaign = await Campaigns.create(req.body);
+  const newCampaign = await Sliders.create(req.body);
+  const newPhotoNames = [];
 
-  // Eğer base64 formatında fotoğraf varsa
-  if (req.body.photos) {
-    // Base64 verisini buffer'a çevir
+  for (let i = 0; i < newCampaign.photos.length; i++) {
     const imageBuffer = Buffer.from(
-      newCampaign.photos[0].replace(/^data:image\/\w+;base64,/, ""),
+      newCampaign.photos[i].replace(/^data:image\/\w+;base64,/, ""),
       "base64"
     );
     // Resmi boyutlandır ve kaydet
-    const filename = `campaign-${newCampaign._id}-${Date.now()}.jpeg`;
+    const filename = `campaign-${newCampaign._id}-${Date.now()}-${i}.jpeg`;
     await sharp(imageBuffer)
       .resize(1400, 450)
       .toFormat("jpeg")
       .jpeg({ quality: 90 })
       .toFile(`${targetDir}/${filename}`);
 
-    // Oluşturulan dosya ismini veriye ekle
-    newCampaign.photos = [];
-    newCampaign.photos.push(filename);
-
-    // Ürünü güncelle
-    await newCampaign.save();
+    // Oluşturulan dosya ismini yeni diziye ekle
+    newPhotoNames.push(filename);
   }
 
+  // Yeni dosya adlarını newCampaign.photos dizisine ekleyin
+  newCampaign.photos = newPhotoNames;
+
+  // Kampanya verisini kaydedin
+  await newCampaign.save();
+
   res.status(200).json({
-    status: "succes",
+    status: "success",
     data: {
       data: newCampaign,
     },
@@ -87,7 +88,7 @@ exports.createCampaign = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllCampaigns = catchAsync(async (req, res, next) => {
-  const campaigns = await Campaigns.find();
+  const campaigns = await Sliders.find();
 
   if (!campaigns) return next(new AppError("There is no campaign yet"));
 
@@ -101,7 +102,7 @@ exports.getAllCampaigns = catchAsync(async (req, res, next) => {
 });
 
 exports.getCampaign = catchAsync(async (req, res, next) => {
-  const campaign = await Campaigns.find(req.params.id);
+  const campaign = await Sliders.find(req.params.id);
 
   if (!campaign) return next(new AppError("There is no campaign that id"));
 
@@ -114,7 +115,7 @@ exports.getCampaign = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteCampaign = catchAsync(async (req, res, next) => {
-  await Campaign.findOneAndDelete(req.params.id);
+  await Sliders.findOneAndDelete(req.params.id);
 
   res.status(200).json({
     status: "success",

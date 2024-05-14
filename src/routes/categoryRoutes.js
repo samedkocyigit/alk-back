@@ -11,7 +11,11 @@ router
 router
   .route("/:id")
   .get(categoryService.getCategory)
-  .post(categoryService.createSubCategory)
+  .post(
+    categoryService.uploadSubCategoyImages,
+    categoryService.resizeSubCategoryImages,
+    categoryService.createSubCategory
+  )
   .patch(categoryService.updateCategory)
   .delete(categoryService.deleteCategory);
 

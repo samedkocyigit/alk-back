@@ -38,11 +38,13 @@ const createSendToken = (user, statusCode, res) => {
 };
 
 exports.signUp = catchAsync(async (req, res, next) => {
+  console.log("tövbeeee ", req.body);
   const newUser = await User.create({
     name: req.body.name,
     surname: req.body.surname,
     email: req.body.email,
     password: req.body.password,
+    gender: req.body.gender,
   });
 
   const newCart = await Cart.create({
