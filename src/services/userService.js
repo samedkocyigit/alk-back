@@ -77,3 +77,39 @@ exports.updateOneUser = catchAsync(async (req, res, next) => {
     },
   });
 });
+
+// exports.updateOneUser = catchAsync(async (req, res, next) => {
+//   const userId = req.params.id;
+//   const update = req.body;
+
+//   const user = await User.findById(userId);
+
+//   if (!user) {
+//     return next(new AppError("No document found with that ID", 404));
+//   }
+
+//   // Favori öğe ekleme
+//   if (update.$push && update.$push.favoriteItems) {
+//     user.favoriteItems.push(update.$push.favoriteItems);
+//     delete update.$push.favoriteItems; // Favori öğeyi kullanıcı bilgilerinden kaldır
+//   }
+
+//   // Favori öğe çıkarma
+//   if (update.$pull && update.$pull.favoriteItems) {
+//     user.favoriteItems.pull(update.$pull.favoriteItems);
+//     delete update.$pull.favoriteItems; // Favori öğeyi kullanıcı bilgilerinden kaldır
+//   }
+
+//   // Kullanıcı bilgilerini güncelle
+//   Object.assign(user, update);
+
+//   // Kullanıcıyı kaydet
+//   const updatedUser = await user.save();
+
+//   res.status(200).json({
+//     status: "success",
+//     data: {
+//       data: updatedUser,
+//     },
+//   });
+// });
