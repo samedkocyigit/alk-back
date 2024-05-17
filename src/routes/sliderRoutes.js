@@ -17,6 +17,7 @@ router
 router
   .route("/:id")
   .get(sliderService.getCampaign)
+  .patch(sliderService.updateCampaign)
   .delete(sliderService.deleteCampaign);
 
 module.exports = router;
