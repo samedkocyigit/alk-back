@@ -45,6 +45,9 @@ exports.signUp = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     gender: req.body.gender,
+    phone: req.body.phone,
+    taxOffice: req.body.taxOffice,
+    taxNumber: req.body.taxNumber,
   });
 
   const newCart = await Cart.create({
