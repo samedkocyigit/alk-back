@@ -5,6 +5,7 @@ const sharp = require("sharp");
 const Sliders = require("../models/sliderModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
+const { url } = require("inspector");
 
 const targetDir = path.join(
   __dirname,
@@ -37,49 +38,127 @@ exports.resizeCampaignImages = catchAsync(async (req, res, next) => {
 
   await Promise.all(
     req.files.photos.map(async (file, i) => {
-      const filename = `campaign-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      const photoFilename = `campaign-${req.params.id}-${Date.now()}-${i + 1}.jpeg`;
+      const thumbFilename = `campaign-${req.params.id}-${Date.now()}-${i + 1}-thumb.jpeg`;
 
+      // Ana fotoğrafı kaydet ve boyutlandır
       await sharp(file.buffer)
-        .resize(1600, 450)
+        .resize(1920, 542) // Slider fotoğraf boyutu
         .toFormat("jpeg")
         .jpeg({ quality: 90 })
-        .toFile(`${targetDir}/${filename}`);
+        .toFile(`${targetDir}/${photoFilename}`);
 
-      req.body.photos.push(filename);
+      // Thumbnail'i kaydet ve boyutlandır
+      await sharp(file.buffer)
+        .resize(70, 40) // Thumb fotoğraf boyutu
+        .toFormat("jpeg")
+        .jpeg({ quality: 80 })
+        .toFile(`${targetDir}/${thumbFilename}`);
+
+      req.body.photos.push({ url: photoFilename, thumbNail: thumbFilename });
     })
   );
 
   next();
 });
 
-exports.createCampaign = catchAsync(async (req, res, next) => {
-  const newCampaign = await Sliders.create(req.body);
+exports.updateCampaign = catchAsync(async (req, res, next) => {
+  const updatedSlider = await Sliders.sliderSchema.findById(req.params.id);
+
+  const newPhotos = await Sliders.sliderPhotoSchema.create({
+    url: req.body.photos[0],
+    thumbNail: req.body.photos[1],
+  });
+
   const newPhotoNames = [];
 
-  for (let i = 0; i < newCampaign.photos.length; i++) {
-    const imageBuffer = Buffer.from(
-      newCampaign.photos[i].replace(/^data:image\/\w+;base64,/, ""),
-      "base64"
-    );
-    // Resmi boyutlandır ve kaydet
-    const filename = `campaign-${newCampaign._id}-${Date.now()}-${i}.jpeg`;
-    await sharp(imageBuffer)
-      .resize(1400, 450)
-      .toFormat("jpeg")
-      .jpeg({ quality: 90 })
-      .toFile(`${targetDir}/${filename}`);
+  const photoBuffer = Buffer.from(
+    newPhotos.url.replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
+  const thumbBuffer = Buffer.from(
+    newPhotos.thumbNail.replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
+  const photoFilename = `campaign-${updatedSlider._id}-${Date.now()}-.jpeg`;
+  const thumbFilename = `campaign-${updatedSlider._id}-${Date.now()}-thumb.jpeg`;
 
-    // Oluşturulan dosya ismini yeni diziye ekle
-    newPhotoNames.push(filename);
-  }
+  // Ana fotoğrafı kaydet
+  await sharp(photoBuffer)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`${targetDir}/${photoFilename}`);
 
+  // Thumbnail'i kaydet
+  await sharp(thumbBuffer)
+    .toFormat("jpeg")
+    .jpeg({ quality: 80 })
+    .toFile(`${targetDir}/${thumbFilename}`);
+
+  // Oluşturulan dosya adlarını yeni diziye ekle
+  newPhotoNames.push({ url: photoFilename, thumbNail: thumbFilename });
+  newPhotos.url = newPhotoNames[0].url;
+  newPhotos.thumbNail = newPhotoNames[0].thumbNail;
+
+  await newPhotos.save();
+  await updatedSlider.photos.push(newPhotos._id);
+  await updatedSlider.save();
+
+  res.status(201).json({
+    status: "success",
+    data: {
+      data: updatedSlider,
+    },
+  });
+});
+
+exports.createCampaign = catchAsync(async (req, res, next) => {
+  const newPhotos = await Sliders.sliderPhotoSchema.create({
+    url: req.body.photos[0],
+    thumbNail: req.body.photos[1],
+  });
+
+  const newPhotoNames = [];
+
+  const photoBuffer = Buffer.from(
+    newPhotos.url.replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
+  const thumbBuffer = Buffer.from(
+    newPhotos.thumbNail.replace(/^data:image\/\w+;base64,/, ""),
+    "base64"
+  );
+
+  const newCampaign = await Sliders.sliderSchema.create({
+    name: req.body.name,
+    photos: newPhotos._id,
+  });
+  const photoFilename = `campaign-${newCampaign._id}-${Date.now()}-.jpeg`;
+  const thumbFilename = `campaign-${newCampaign._id}-${Date.now()}-thumb.jpeg`;
+
+  // Ana fotoğrafı kaydet
+  await sharp(photoBuffer)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`${targetDir}/${photoFilename}`);
+
+  // Thumbnail'i kaydet
+  await sharp(thumbBuffer)
+    .toFormat("jpeg")
+    .jpeg({ quality: 80 })
+    .toFile(`${targetDir}/${thumbFilename}`);
+
+  // Oluşturulan dosya adlarını yeni diziye ekle
+  newPhotoNames.push({ url: photoFilename, thumbNail: thumbFilename });
   // Yeni dosya adlarını newCampaign.photos dizisine ekleyin
-  newCampaign.photos = newPhotoNames;
+  newPhotos.url = newPhotoNames[0].url;
+  newPhotos.thumbNail = newPhotoNames[0].thumbNail;
 
   // Kampanya verisini kaydedin
+  await newPhotos.save();
   await newCampaign.save();
 
-  res.status(200).json({
+  res.status(201).json({
     status: "success",
     data: {
       data: newCampaign,
@@ -88,7 +167,7 @@ exports.createCampaign = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllCampaigns = catchAsync(async (req, res, next) => {
-  const campaigns = await Sliders.find();
+  const campaigns = await Sliders.sliderSchema.find();
 
   if (!campaigns) return next(new AppError("There is no campaign yet"));
 

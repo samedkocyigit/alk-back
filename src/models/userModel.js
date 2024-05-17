@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const path = require("path");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -34,17 +35,9 @@ const userSchema = new mongoose.Schema({
     enum: ["erkek", "kadin", "belirtmek-istemiyorum"],
     default: "belirtmek-istemiyorum",
   },
-  telNumber: {
-    type: {
-      countryCode: {
-        type: Number,
-        required: true,
-      },
-      number: {
-        type: Number,
-        required: true,
-      },
-    },
+  phone: {
+    type: Number,
+    min: [10],
     required: false,
   },
   companyName: {
@@ -133,6 +126,14 @@ userSchema.methods.createPasswordResetToken = function () {
 
 userSchema.virtual("fullName").get(function () {
   return this.name + " " + this.surname;
+});
+
+userSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: "favoriteItems",
+    select: "-__v",
+  });
+  next();
 });
 
 const User = mongoose.model("User", userSchema);
