@@ -55,18 +55,20 @@ exports.resizeProductImages = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllProducts = catchAsync(async (req, res, next) => {
-  // To allow for nested GET reviews on tour (hack)
-  let filter = {};
-  if (req.params.productId) filter = { product: req.params.tourId };
+  // Product.find() metodu ile bir sorgu yapın
+  const query = Product.find(); // Örnek sorgu, filtrelemeyi ve diğer işlemleri eklemeyi unutmayın
 
-  const features = new FilterProduct(Product.find(filter), req.query)
+  // FilterProduct sınıfına geçirin
+  const features = new FilterProduct(query, req.query)
     .filter()
     .sort()
     .limitFields()
     .paginate();
-  // const doc = await features.query.explain();
+
+  // Sonuçları alın
   const doc = await features.query;
 
+  // Yanıtı gönderin
   res.status(200).json({
     status: "success",
     requestedAt: doc.length,

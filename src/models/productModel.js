@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const path = require("path");
 const { default: slugify } = require("slugify");
+const moment = require("moment-timezone"); // moment-timezone paketini kullanacağız
 
 const productSchema = new mongoose.Schema(
   {
@@ -52,6 +53,7 @@ const productSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: { currentTime: () => moment().tz("Europe/Istanbul").format() }, // Zaman dilimini ayarladık
   }
 );
 

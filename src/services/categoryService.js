@@ -6,6 +6,7 @@ const catchAsync = require("../utils/catchAsync");
 const Category = require("../models/categoryModel");
 const Product = require("../models/productModel");
 const AppError = require("../utils/appError");
+const FilterProduct = require("../utils/filter");
 
 const targetDirCategory = path.join(
   __dirname,
@@ -160,20 +161,72 @@ exports.createCategory = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getCategory = catchAsync(async (req, res, next) => {
-  const category = await Category.findById(req.params.id);
+exports.getCategory = async (req, res, next) => {
+  try {
+    // Kategoriyi bulun
+    const category = await Category.findById(req.params.id);
 
-  if (!category) {
-    return next(new AppError("There is a no document with that Id.", 404));
+    if (!category) {
+      return next(new AppError("There is no document with that Id.", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: category,
+      },
+    });
+  } catch (err) {
+    next(err);
   }
+};
 
+exports.getCategoryForProducts = async (req, res, next) => {
+  try {
+    // Kategoriyi bulun
+    const category = await Category.findById(req.params.id);
+
+    if (!category) {
+      return next(new AppError("There is no document with that Id.", 404));
+    }
+
+    // Alt kategorileri ve ürünleri filtrelemek için FilterProduct sınıfını kullanın
+    const products = Product.find({ categoryId: req.params.id });
+    console.log("cate", products);
+    const features = new FilterProduct(products, req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const doc = await features.query;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        data: doc,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getCategoryBySlug = async (req, res, next) => {
+  // Kategori servisine slug değerini ileterek kategoriyi bul
+  const category = await Category.find({ slug: req.params.slug });
+  // Eğer kategori bulunamazsa 404 hatası döndür
+  if (!category) {
+    return res.status(404).json({ message: "Category not found" });
+  }
+  // Kategoriyi request objesine ekleyerek diğer middleware fonksiyonlarına geçiş yap
   res.status(200).json({
     status: "success",
     data: {
-      data: category,
+      category,
     },
   });
-});
+};
 
 exports.updateCategory = catchAsync(async (req, res, next) => {
   const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
