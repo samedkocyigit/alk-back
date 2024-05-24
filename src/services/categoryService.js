@@ -1,6 +1,7 @@
 const path = require("path");
 const multer = require("multer");
 const sharp = require("sharp");
+const slugify = require("slugify");
 
 const catchAsync = require("../utils/catchAsync");
 const Category = require("../models/categoryModel");
@@ -8,6 +9,7 @@ const Product = require("../models/productModel");
 const AppError = require("../utils/appError");
 const FilterProduct = require("../utils/filter");
 
+//-----------------------photo action
 const targetDirCategory = path.join(
   __dirname,
   "../../../frontend/public/images/categories/"
@@ -80,7 +82,9 @@ exports.resizeSubCategoryImages = catchAsync(async (req, res, next) => {
 
   next();
 });
+//-----------------------end photo actions
 
+//-----------------------category actions
 exports.getAllCategory = catchAsync(async (req, res, next) => {
   const categories = await Category.find();
 
@@ -161,7 +165,7 @@ exports.createCategory = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.getCategory = async (req, res, next) => {
+exports.getCategory = catchAsync(async (req, res, next) => {
   try {
     // Kategoriyi bulun
     const category = await Category.findById(req.params.id);
@@ -179,9 +183,9 @@ exports.getCategory = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+});
 
-exports.getCategoryForProducts = async (req, res, next) => {
+exports.getCategoryForProducts = catchAsync(async (req, res, next) => {
   try {
     // Kategoriyi bulun
     const category = await Category.findById(req.params.id);
@@ -192,7 +196,6 @@ exports.getCategoryForProducts = async (req, res, next) => {
 
     // Alt kategorileri ve ürünleri filtrelemek için FilterProduct sınıfını kullanın
     const products = Product.find({ categoryId: req.params.id });
-    console.log("cate", products);
     const features = new FilterProduct(products, req.query)
       .filter()
       .sort()
@@ -203,6 +206,7 @@ exports.getCategoryForProducts = async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
+      requiredAt: doc.length,
       data: {
         data: doc,
       },
@@ -210,9 +214,9 @@ exports.getCategoryForProducts = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
-};
+});
 
-exports.getCategoryBySlug = async (req, res, next) => {
+exports.getCategoryBySlug = catchAsync(async (req, res, next) => {
   // Kategori servisine slug değerini ileterek kategoriyi bul
   const category = await Category.find({ slug: req.params.slug });
   // Eğer kategori bulunamazsa 404 hatası döndür
@@ -226,7 +230,62 @@ exports.getCategoryBySlug = async (req, res, next) => {
       category,
     },
   });
-};
+});
+
+exports.putFilterAtCategory = catchAsync(async (req, res, next) => {
+  // Gelen her filtre ve değerler için slug oluşturma
+  if (req.body.filter) {
+    req.body.filter = req.body.filter.map((filter) => {
+      filter.slug = slugify(filter.name, { lower: true });
+      if (filter.values) {
+        filter.values = filter.values.map((value) => {
+          value.slug = slugify(value.name, { lower: true });
+          return value;
+        });
+      }
+      return filter;
+    });
+  }
+
+  const category = await Category.findByIdAndUpdate(
+    req.params.id,
+    { $push: { filter: { $each: req.body.filter } } },
+    { new: true, runValidators: true }
+  );
+
+  if (!category) {
+    return next(new AppError("Documents could not be updated.", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: category,
+    },
+  });
+});
+
+exports.removeFilterFromCategory = catchAsync(async (req, res, next) => {
+  const { id, filterId } = req.params;
+
+  const category = await Category.findByIdAndUpdate(
+    id,
+    { $pull: { filter: { _id: filterId } } },
+
+    { new: true, runValidators: true }
+  );
+
+  if (!category) {
+    return next(new AppError("Documents could not be update.", 404));
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      data: category,
+    },
+  });
+});
 
 exports.updateCategory = catchAsync(async (req, res, next) => {
   const category = await Category.findByIdAndUpdate(req.params.id, req.body, {
@@ -258,6 +317,31 @@ exports.deleteCategory = catchAsync(async (req, res, next) => {
     data: {
       data: null,
     },
+  });
+});
+//------------------------end category actions
+
+//------------------------sub category actions
+exports.getSubCategoryBySlug = catchAsync(async (req, res, next) => {
+  const category = await Category.findOne({
+    "sub_category.slug": req.params.slug,
+  });
+
+  if (!category) {
+    return res.status(404).json({ message: "Sub Category not found" });
+  }
+
+  const sub_category = category.sub_category.find(
+    (sub) => sub.slug === req.params.slug
+  );
+
+  if (!category) {
+    return res.status(404).json({ message: "Sub Category not found" });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: { sub_category },
   });
 });
 
@@ -354,12 +438,10 @@ exports.createSubCategory = catchAsync(async (req, res, next) => {
   }
 
   if (req.body.photos) {
-    console.log("girdi");
     category.sub_category.push({
       sub_category_name: req.body.sub_category_name,
       photos: req.body.photos,
     });
-    console.log("çıktı");
 
     const newSubCategory = category.sub_category.pop();
     // Base64 verisini buffer'a çevir
@@ -407,6 +489,34 @@ exports.getProductsUnderSubCategory = catchAsync(async (req, res, next) => {
     return next(new AppError("No Sub Category documents found.", 404));
   }
 
+  const products = await Product.find({ subCategoryId: subCategory._id });
+
+  const features = new FilterProduct(products, req.query);
+
+  const doc = await features.query;
+
+  res.status(200).json({
+    status: "success",
+    requiredAt: doc.length,
+    data: {
+      data: doc,
+    },
+  });
+});
+
+exports.getSubCategoryUnderCategory = catchAsync(async (req, res, next) => {
+  const category = await Category.findById(req.params.id);
+
+  if (!category) {
+    return next(new AppError("No documents found.", 404));
+  }
+
+  const subCategory = category.sub_category.id(req.params.sub_category_id);
+
+  if (!subCategory) {
+    return next(new AppError("No Sub Category documents found.", 404));
+  }
+
   res.status(200).json({
     status: "success",
     requiredAt: subCategory.length,
@@ -415,3 +525,4 @@ exports.getProductsUnderSubCategory = catchAsync(async (req, res, next) => {
     },
   });
 });
+//---------------------------end sub category actions
