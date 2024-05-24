@@ -44,7 +44,7 @@ exports.resizeProductImages = catchAsync(async (req, res, next) => {
       await sharp(file.buffer)
         .resize(200, 180)
         .toFormat("jpeg")
-        .jpeg({ quality: 90 })
+        .jpeg({ quality: 99 })
         .toFile(`${targetDir}/${filename}`);
 
       req.body.photos.push(filename);
@@ -94,7 +94,7 @@ exports.createProduct = catchAsync(async (req, res, next) => {
     await sharp(imageBuffer)
       .resize(200, 180)
       .toFormat("jpeg")
-      .jpeg({ quality: 90 })
+      .jpeg({ quality: 99 })
       .toFile(`${targetDir}/${filename}`);
 
     // Oluşturulan dosya ismini veriye ekle
