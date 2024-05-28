@@ -36,20 +36,29 @@ const productSchema = new mongoose.Schema(
       trim: true,
       required: [true, "Product must have a summary"],
     },
-    manufactorer_code: String,
+    manufacturer_code: String,
     photos: [
       {
         type: String,
         required: [true, "Product must have a photo"],
       },
     ],
+    photos_detail: [{ type: String }],
+
     brand: {
       type: mongoose.Schema.ObjectId,
       ref: "Brand",
     },
     categoryId: String,
     subCategoryId: String,
+    ozellikler: [
+      {
+        name: String,
+        value: String,
+      },
+    ],
   },
+
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

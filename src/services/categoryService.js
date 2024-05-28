@@ -458,14 +458,13 @@ exports.createSubCategory = catchAsync(async (req, res, next) => {
       .toFile(`${targetDirSubCategory}/${filename}`);
 
     newSubCategory.photos = filename;
-    console.log("istenilen kategori", newSubCategory);
-    console.log("id", req.params.id);
-    // await category.save();
     await Category.findByIdAndUpdate(
       req.params.id,
       { $push: { sub_category: newSubCategory } },
       { new: true, runValidators: false }
     );
+
+    await category.save();
   }
 
   res.status(200).json({

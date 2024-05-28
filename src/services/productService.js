@@ -97,9 +97,18 @@ exports.createProduct = catchAsync(async (req, res, next) => {
       .jpeg({ quality: 99 })
       .toFile(`${targetDir}/${filename}`);
 
+    const filenametwo = `product-detail-${newProduct._id}-${Date.now()}.jpeg`;
+    await sharp(imageBuffer)
+      .resize(555, 500)
+      .toFormat("jpeg")
+      .jpeg({ quality: 99 })
+      .toFile(`${targetDir}/${filename}`);
+
     // Oluşturulan dosya ismini veriye ekle
     newProduct.photos = [];
+    newProduct.photos_detail = [];
     newProduct.photos.push(filename);
+    newProduct.photos_detail.push(filenametwo);
 
     const category = await Category.findById(req.body.categoryId);
     const subCategory = category.sub_category.id(req.body.subCategoryId);
