@@ -20,6 +20,8 @@ const overviewRouter = require("./src/routes/overviewRoutes");
 const brandRouter = require("./src/routes/brandRoutes");
 const sliderRouter = require("./src/routes/sliderRoutes");
 const cartRouter = require("./src/routes/cartRoutes");
+const adressRouter = require("./src/routes/adressRoutes");
+const orderRouter = require("./src/routes/orderRoutes");
 
 const app = express();
 var corsOptions = {
@@ -93,6 +95,8 @@ app.use("/comments", commentRouter);
 app.use("/brands", brandRouter);
 app.use("/sliders", sliderRouter);
 app.use("/carts", cartRouter);
+app.use("/adress", adressRouter);
+app.use("/order", orderRouter);
 
 // app.get("*", (req, res) => {
 //   res.sendFile(path.join(vueAppPath, "index.html"));
