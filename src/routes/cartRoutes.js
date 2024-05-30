@@ -11,4 +11,6 @@ router
   .post(cartService.addProductAtCart)
   .patch(cartService.removeProductFromCart);
 
+router.route("/:id/:productid").delete(cartService.deleteProductFromCart);
+
 module.exports = router;

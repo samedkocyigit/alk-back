@@ -206,7 +206,7 @@ exports.getCategoryForProducts = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      requiredAt: doc.length,
+      requestedAt: doc.length,
       data: {
         data: doc,
       },

@@ -14,6 +14,7 @@ router
     brandsService.resizeBrandImages,
     brandsService.createNewBrand
   );
+
 router
   .route("/:id")
   .get(brandsService.getOneBrand)

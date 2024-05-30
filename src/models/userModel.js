@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const Adress = require("./adressModel");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -53,6 +54,10 @@ const userSchema = new mongoose.Schema({
   cart: {
     type: mongoose.Schema.ObjectId,
     ref: "Cart",
+  },
+  adress: {
+    type: mongoose.Schema.ObjectId,
+    ref: "Adress",
   },
   favoriteItems: [{ type: mongoose.Schema.ObjectId, ref: "Product" }],
   taxOffice: String,

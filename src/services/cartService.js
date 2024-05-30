@@ -1,6 +1,7 @@
 const Cart = require("../models/cartModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
+const { ObjectId } = require("mongodb");
 
 exports.createCart = catchAsync(async (req, res, next) => {
   const cart = await Cart.create(req.body);
@@ -102,11 +103,46 @@ exports.removeProductFromCart = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.removeProductAtCart = catchAsync(async (req, res, next) => {
-  const removeItem = await Cart.findOneAndDelete(req.params.id);
+exports.deleteProductFromCart = catchAsync(async (req, res, next) => {
+  const cartId = req.params.id;
+  const productId = req.params.productid; // Silmek istediğiniz ürünün _id değeri
+  console.log("değerler", cartId, productId);
+
+  // Cart koleksiyonunu bul
+  const cart = await Cart.findById(cartId);
+
+  // Cart bulunamazsa
+  if (!cart) {
+    return res.status(404).json({
+      status: "error",
+      message: "Cart bulunamadı",
+    });
+  }
+
+  // Ürünün index'ini bul
+  const index = cart.items.findIndex(
+    (item) => item.product._id.toString() === productId
+  );
+
+  // Ürün bulunamazsa
+  if (index === -1) {
+    return res.status(404).json({
+      status: "error",
+      message: "Ürün bulunamadı",
+    });
+  }
+
+  // Ürünü çıkar
+  cart.items.splice(index, 1);
+
+  // Cart'ı güncelle
+  const updatedCart = await cart.save();
+  console.log("update", updatedCart);
 
   res.status(200).json({
     status: "success",
-    data: null,
+    data: {
+      data: updatedCart,
+    },
   });
 });
