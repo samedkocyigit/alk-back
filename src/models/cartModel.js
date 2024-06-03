@@ -1,30 +1,36 @@
 const mongoose = require("mongoose");
 const path = require("path");
+const moment = require("moment-timezone"); // moment-timezone paketini kullanacağız
 
-const cartSchema = new mongoose.Schema({
-  items: [
-    {
-      product: {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
-        required: true,
+const cartSchema = new mongoose.Schema(
+  {
+    items: [
+      {
+        product: {
+          type: mongoose.Schema.ObjectId,
+          ref: "Product",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          default: 1, // İsteğe bağlı, varsayılan değer atayabilirsiniz
+        },
       },
-      quantity: {
-        type: Number,
-        required: true,
-        default: 1, // İsteğe bağlı, varsayılan değer atayabilirsiniz
-      },
+    ],
+    userId: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
     },
-  ],
-  userId: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
+    totalPrice: {
+      type: Number,
+      default: 0,
+    },
   },
-  totalPrice: {
-    type: Number,
-    default: 0,
-  },
-});
+  {
+    timestamps: { currentTime: () => moment().tz("Europe/Istanbul").format() }, // Zaman dilimini ayarladık
+  }
+);
 
 // Cart belgesi kaydedilmeden önce totalPrice değerini güncelle
 cartSchema.pre("save", async function (next) {

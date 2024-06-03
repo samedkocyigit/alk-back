@@ -1,18 +1,41 @@
 const mongoose = require("mongoose");
+const moment = require("moment-timezone"); // moment-timezone paketini kullanacağız
 
-const orderSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.ObjectId,
-    ref: "User",
+const orderSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+    },
+    cart: { type: mongoose.Schema.ObjectId, ref: "Cart" },
+    address: {
+      type: mongoose.Schema.ObjectId,
+      ref: "Address",
+    },
   },
-  products: [{ type: mongoose.Schema.ObjectId, ref: "Product" }],
-  shippingAdress: {
-    type: mongoose.Schema.ObjectId,
-    ref: "Adress",
-  },
-  total: Number,
-});
+  {
+    timestamps: { currentTime: () => moment().tz("Europe/Istanbul").format() }, // Zaman dilimini ayarladık
+  }
+);
 
 const Order = mongoose.model("Order", orderSchema);
+
+orderSchema.pre(/^find/, function (next) {
+  this.populate([
+    {
+      path: "user",
+      select: "-__v",
+    },
+    {
+      path: "cart",
+      select: "-__v",
+    },
+    {
+      path: "address",
+      select: "-__v",
+    },
+  ]);
+  next();
+});
 
 module.exports = Order;

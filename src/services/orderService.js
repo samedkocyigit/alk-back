@@ -1,4 +1,5 @@
 const Order = require("../models/orderModel");
+const User = require("../models/userModel");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
 
@@ -32,10 +33,24 @@ exports.getOrder = catchAsync(async (req, res, next) => {
 });
 
 exports.createOrder = catchAsync(async (req, res, next) => {
-  const newOrder = await Order.create(req.body);
+  const { user, address, cart } = req.body;
+  const newOrder = await Order.create({
+    user: user,
+    address: address,
+    cart: cart,
+  });
 
   if (!newOrder) {
-    return new AppError("Creation failed", 400);
+    return next(new AppError("Creation failed", 400));
+  }
+  const userUpdateResponse = await User.findByIdAndUpdate(
+    user,
+    { $push: { orders: newOrder._id } },
+    { new: true, runValidators: true }
+  );
+
+  if (!userUpdateResponse) {
+    return next(new AppError("User update failed", 400));
   }
 
   res.status(200).json({

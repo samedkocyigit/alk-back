@@ -28,4 +28,6 @@ router
   .patch(userService.updateOneUser)
   .delete(userService.deleteOneUser);
 
+router.route("/:id/:address").patch(userService.addAdressToUser);
+
 module.exports = router;
