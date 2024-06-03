@@ -2,6 +2,7 @@ const Cart = require("../models/cartModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const { ObjectId } = require("mongodb");
+const moment = require("moment-timezone"); // moment-timezone paketini kullanacağız
 
 exports.createCart = catchAsync(async (req, res, next) => {
   const cart = await Cart.create(req.body);
@@ -45,60 +46,47 @@ exports.getAllCarts = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.addProductAtCart = catchAsync(async (req, res, next) => {
+exports.updateCartItem = catchAsync(async (req, res, next) => {
   const { items } = req.body;
   const cart = await Cart.findById(req.params.id);
 
   if (Array.isArray(items)) {
-    for (const item of items) {
-      const existingItem = cart.items.find((cartItem) =>
-        cartItem.product.equals(item.product)
-      );
+    // Eğer cart.items boşsa ve yeni ürün eklenecekse, direkt olarak yeni ürünü ekle
+    if (cart.items.length === 0 && items.some((item) => item.quantity > 0)) {
+      cart.items = items.map((item) => ({
+        product: item.product,
+        quantity: item.quantity,
+      }));
+    } else {
+      for (const item of items) {
+        const existingItem = cart.items.find((cartItem) =>
+          cartItem.product.equals(item.product)
+        );
 
-      if (existingItem) {
-        // Eğer ürün kartta zaten varsa, sadece miktarını artır
-        existingItem.quantity += item.quantity;
-      } else {
-        console.log("else");
-        // Eğer ürün kartta yoksa, yeni bir ürün olarak ekle
-        cart.items.push({ product: item.product, quantity: item.quantity });
+        if (existingItem) {
+          existingItem.quantity += item.quantity;
+
+          // Eğer miktar 0 veya daha az ise ürünü sepetten çıkar
+          if (existingItem.quantity <= 0) {
+            cart.items = cart.items.filter(
+              (cartItem) => !cartItem.product.equals(item.product)
+            );
+          }
+        } else if (item.quantity > 0) {
+          // Eğer ürün kartta yoksa ve miktar pozitifse, yeni bir ürün olarak ekle
+          cart.items.push({ product: item.product, quantity: item.quantity });
+        }
       }
     }
   }
 
   await cart.save();
+  const updatedCart = await Cart.findById(req.params.id);
 
   res.status(200).json({
     status: "success",
     data: {
-      data: cart,
-    },
-  });
-});
-
-exports.removeProductFromCart = catchAsync(async (req, res, next) => {
-  const { items } = req.body;
-  const cart = await Cart.findById(req.params.id);
-
-  if (Array.isArray(items)) {
-    for (const item of items) {
-      const existingItem = cart.items.find((cartItem) =>
-        cartItem.product.equals(item.product)
-      );
-
-      if (existingItem) {
-        // Eğer ürün kartta zaten varsa, sadece miktarını artır
-        existingItem.quantity -= item.quantity;
-      }
-    }
-  }
-
-  await cart.save();
-
-  res.status(200).json({
-    status: "success",
-    data: {
-      data: cart,
+      data: updatedCart,
     },
   });
 });

@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Product = require("../models/productModel");
+const moment = require("moment-timezone"); // moment-timezone paketini kullanacağız
 
 const commentSchema = new mongoose.Schema(
   {
@@ -21,6 +22,7 @@ const commentSchema = new mongoose.Schema(
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: { currentTime: () => moment().tz("Europe/Istanbul").format() }, // Zaman dilimini ayarladık
   }
 );
 

@@ -78,6 +78,25 @@ exports.updateOneUser = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.addAdressToUser = catchAsync(async (req, res, next) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { $push: { address: req.params.address } },
+    { new: true, runValidators: true }
+  );
+
+  if (!user) {
+    return new AppError("Kullanıcı bulunamadı", 404);
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      user,
+    },
+  });
+});
+
 // exports.updateOneUser = catchAsync(async (req, res, next) => {
 //   const userId = req.params.id;
 //   const update = req.body;
